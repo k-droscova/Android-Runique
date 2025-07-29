@@ -42,8 +42,8 @@ annotation = "1.9.1"
 projectApplicationId = "com.example.drosckar.runique"
 projectVersionName = "1.0"
 projectMinSdkVersion = "27"
-projectTargetSdkVersion = "34"
-projectCompileSdkVersion = "34"
+projectTargetSdkVersion = "35"
+projectCompileSdkVersion = "35"
 projectVersionCode = "1"
 
 [libraries]
