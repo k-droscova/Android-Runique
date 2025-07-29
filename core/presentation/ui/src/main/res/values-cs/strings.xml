@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_disk_full">Nepodařilo se uložit položku, protože disk je plný.</string>
+    <string name="error_request_timeout">Vypršel časový limit požadavku.</string>
+    <string name="error_too_many_requests">Dosáhli jste limitu požadavků.</string>
+    <string name="error_no_internet">Nepodařilo se navázat spojení se serverem, zkontrolujte připojení k internetu.</string>
+    <string name="error_payload_too_large">Soubor, který se pokoušíte nahrát, je příliš velký.</string>
+    <string name="error_server_error">Jejda, něco se pokazilo. Zkuste to prosím znovu.</string>
+    <string name="error_serialization">Jejda, nepodařilo se zpracovat data.</string>
+    <string name="error_unknown">Došlo k neznámé chybě.</string>
+</resources>
