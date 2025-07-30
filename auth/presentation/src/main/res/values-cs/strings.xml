@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="runique">Runique</string>
+    <string name="welcome_to_runique">Vítejte v Runique!</string>
+    <string name="runique_description">Sledujte své běhy, stanovujte si cíle a dosahujte fitness milníků s naší intuitivní aplikací.</string>
+    <string name="sign_up">Registrovat se</string>
+    <string name="sign_in">Přihlásit se</string>
+</resources>
