@@ -5,4 +5,16 @@
     <string name="runique_description">Sledujte své běhy, stanovujte si cíle a dosahujte fitness milníků s naší intuitivní aplikací.</string>
     <string name="sign_up">Registrovat se</string>
     <string name="sign_in">Přihlásit se</string>
+    <string name="create_account">Vytvořit účet</string>
+    <string name="already_have_an_account">Už máte účet?</string>
+    <string name="login">Přihlásit se</string>
+    <string name="example_email">priklad@test.com</string>
+    <string name="email">E-mail</string>
+    <string name="must_be_a_valid_email">Musí být platný e-mail</string>
+    <string name="password">Heslo</string>
+    <string name="at_least_x_characters">Alespoň %d znaků</string>
+    <string name="at_least_one_number">Alespoň jedno číslo</string>
+    <string name="contains_lowercase_char">Obsahuje malé písmeno</string>
+    <string name="contains_uppercase_char">Obsahuje velké písmeno</string>
+    <string name="register">Registrovat se</string>
 </resources>
