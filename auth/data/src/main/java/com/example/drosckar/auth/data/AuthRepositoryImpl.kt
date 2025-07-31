@@ -2,8 +2,12 @@ package com.example.drosckar.auth.data
 
 import com.example.drosckar.auth.domain.AuthRepository
 import com.example.drosckar.core.data.networking.post
+import com.example.drosckar.core.domain.util.AuthInfo
+import com.example.drosckar.core.domain.util.Result
 import com.example.drosckar.core.domain.util.EmptyResult
 import com.example.drosckar.core.domain.util.DataError
+import com.example.drosckar.core.domain.util.SessionStorage
+import com.example.drosckar.core.domain.util.asEmptyDataResult
 import io.ktor.client.HttpClient
 
 /**
@@ -12,7 +16,8 @@ import io.ktor.client.HttpClient
  * @property httpClient An instance of [HttpClient] used for making HTTP requests.
  */
 class AuthRepositoryImpl(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val sessionStorage: SessionStorage
 ) : AuthRepository {
 
     /**
@@ -27,5 +32,24 @@ class AuthRepositoryImpl(
             route = "/register",
             body = RegisterRequest(email, password)
         )
+    }
+    override suspend fun login(email: String, password: String): EmptyResult<DataError.Network> {
+        val result = httpClient.post<LoginRequest, LoginResponse>(
+            route = "/login",
+            body = LoginRequest(
+                email = email,
+                password = password
+            )
+        )
+        if(result is Result.Success) {
+            sessionStorage.set(
+                AuthInfo(
+                    accessToken = result.data.accessToken,
+                    refreshToken = result.data.refreshToken,
+                    userId = result.data.userId
+                )
+            )
+        }
+        return result.asEmptyDataResult()
     }
 }

@@ -103,7 +103,7 @@ class HttpClientFactory(
                             )
                         )
 
-                        return@refreshTokens if (response is Result.Success) {
+                        if (response is Result.Success) {
                             // Save the new access token while keeping the existing refresh token
                             val newAuthInfo = AuthInfo(
                                 accessToken = response.data.accessToken,
