@@ -46,9 +46,9 @@ inline fun <T, E: Error, R> Result<T, E>.map(map: (T) -> R): Result<R, E> =
  *
  * Useful when the actual data is not needed and only the success/failure matters.
  *
- * @return A [Result] of type [EmptyDataResult] with [Unit] as the success value.
+ * @return A [Result] of type [EmptyResult] with [Unit] as the success value.
  */
-fun <T, E: Error> Result<T, E>.asEmptyDataResult(): EmptyDataResult<E> {
+fun <T, E: Error> Result<T, E>.asEmptyDataResult(): EmptyResult<E> {
     return map { }
 }
 
@@ -56,4 +56,4 @@ fun <T, E: Error> Result<T, E>.asEmptyDataResult(): EmptyDataResult<E> {
  * A type alias for a [Result] that represents either success with no meaningful return data (i.e. [Unit]),
  * or an error of type [E].
  */
-typealias EmptyDataResult<E> = Result<Unit, E>
+typealias EmptyResult<E> = Result<Unit, E>

@@ -3,6 +3,7 @@ package com.example.drosckar.runique
 import android.app.Application
 import com.example.drosckar.auth.data.di.authDataModule
 import com.example.drosckar.auth.presentation.di.authViewModelModule
+import com.example.drosckar.core.data.di.coreDataModule
 import com.example.drosckar.runique.di.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -23,7 +24,8 @@ class RuniqueApp: Application() {
             modules(
                 authDataModule,
                 authViewModelModule,
-                appModule
+                appModule,
+                coreDataModule
             )
         }
     }
