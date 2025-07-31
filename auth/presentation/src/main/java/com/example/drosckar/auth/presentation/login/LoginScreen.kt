@@ -1,18 +1,16 @@
-package com.example.drosckar.auth.presentation.register
+package com.example.drosckar.auth.presentation.login
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,16 +30,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.drosckar.auth.domain.PasswordValidationState
-import com.example.drosckar.auth.domain.UserDataValidator
 import com.example.drosckar.auth.presentation.R
 import com.example.drosckar.auth.presentation.components.EmailTextField
 import com.example.drosckar.auth.presentation.components.PasswordTextField
-import com.example.drosckar.core.presentation.designsystem.CheckIcon
-import com.example.drosckar.core.presentation.designsystem.CrossIcon
 import com.example.drosckar.core.presentation.designsystem.Poppins
-import com.example.drosckar.core.presentation.designsystem.RuniqueDarkRed
-import com.example.drosckar.core.presentation.designsystem.RuniqueGreen
 import com.example.drosckar.core.presentation.designsystem.RuniqueTheme
 import com.example.drosckar.core.presentation.designsystem.components.GradientBackground
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueActionButton
@@ -50,18 +42,17 @@ import com.example.drosckar.core.presentation.ui.bringIntoViewOnFocus
 import com.example.drosckar.core.presentation.ui.clearFocusOnTap
 import org.koin.androidx.compose.koinViewModel
 
-
 @Composable
-fun RegisterScreenRoot(
-    onSignInClick: () -> Unit,
-    onSuccessfulRegistration: () -> Unit,
-    viewModel: RegisterViewModel = koinViewModel(),
+fun LoginScreenRoot(
+    onLoginSuccess: () -> Unit,
+    onSignUpClick: () -> Unit,
+    viewModel: LoginViewModel = koinViewModel(),
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     ObserveAsEvents(viewModel.events) { event ->
         when(event) {
-            is RegisterEvent.Error -> {
+            is LoginEvent.Error -> {
                 keyboardController?.hide()
                 Toast.makeText(
                     context,
@@ -69,23 +60,23 @@ fun RegisterScreenRoot(
                     Toast.LENGTH_LONG
                 ).show()
             }
-            RegisterEvent.RegistrationSuccess -> {
+            LoginEvent.LoginSuccess -> {
                 keyboardController?.hide()
                 Toast.makeText(
                     context,
-                    R.string.registration_successful,
+                    R.string.youre_logged_in,
                     Toast.LENGTH_LONG
                 ).show()
-                onSuccessfulRegistration()
+
+                onLoginSuccess()
             }
         }
     }
-
-    RegisterScreen(
+    LoginScreen(
         state = viewModel.state,
         onAction = { action ->
             when(action) {
-                RegisterAction.OnLoginClick -> onSignInClick()
+                is LoginAction.OnRegisterClick -> onSignUpClick()
                 else -> Unit
             }
             viewModel.onAction(action)
@@ -94,73 +85,102 @@ fun RegisterScreenRoot(
 }
 
 @Composable
-private fun RegisterScreen(
-    state: RegisterState,
-    onAction: (RegisterAction) -> Unit
+private fun LoginScreen(
+    state: LoginState,
+    onAction: (LoginAction) -> Unit
 ) {
     GradientBackground {
         Column(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .clearFocusOnTap()
                 .padding(horizontal = 16.dp)
                 .padding(vertical = 32.dp)
                 .padding(top = 16.dp)
                 .imePadding()
         ) {
-            Headline()
-            LoginPrompt(
-                onLoginClick = {
-                    onAction(RegisterAction.OnLoginClick)
-                }
-            )
+            LoginHeadline()
+            WelcomeText()
+
             Spacer(modifier = Modifier.height(48.dp))
+
             EmailTextField(
                 modifier = Modifier.bringIntoViewOnFocus(),
-                state = state.email,
-                isEmailValid = state.isEmailValid,
+                state = state.email
             )
             Spacer(modifier = Modifier.height(16.dp))
+
             PasswordTextField(
                 modifier = Modifier.bringIntoViewOnFocus(),
                 state = state.password,
                 isPasswordVisible = state.isPasswordVisible,
                 onTogglePasswordVisibility = {
-                    onAction(RegisterAction.OnTogglePasswordVisibilityClick)
+                    onAction(LoginAction.OnTogglePasswordVisibility)
                 }
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            PasswordRequirements(
-                validationState = state.passwordValidationState
-            )
+
             Spacer(modifier = Modifier.height(32.dp))
-            RegisterButton(
-                isLoading = state.isRegistering,
-                enabled = state.canRegister,
-                onRegisterClick = {
-                    onAction(RegisterAction.OnRegisterClick)
+
+            LoginButton(
+                isLoading = state.isLoggingIn,
+                enabled = state.canLogin,
+                onLoginClick = {
+                    onAction(LoginAction.OnLoginClick)
                 }
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            RegisterPrompt(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .weight(1f)
+            ) {
+                onAction(LoginAction.OnRegisterClick)
+            }
         }
     }
 }
 
 @Composable
-private fun Headline(
-    modifier: Modifier = Modifier
-) {
+private fun LoginHeadline() {
     Text(
-        modifier = modifier,
-        text = stringResource(id = R.string.create_account),
+        text = stringResource(id = R.string.hi_there),
+        fontWeight = FontWeight.SemiBold,
         style = MaterialTheme.typography.headlineMedium
     )
 }
 
 @Composable
-private fun LoginPrompt(
+private fun WelcomeText() {
+    Text(
+        text = stringResource(id = R.string.runique_welcome_text),
+        fontSize = 12.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
+}
+
+@Composable
+private fun LoginButton(
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    enabled: Boolean = false,
     onLoginClick: () -> Unit
+) {
+    RuniqueActionButton(
+        text = stringResource(id = R.string.login),
+        isLoading = isLoading,
+        enabled = enabled,
+        modifier = modifier.fillMaxWidth(),
+        onClick = onLoginClick
+    )
+}
+
+@Composable
+private fun RegisterPrompt(
+    modifier: Modifier = Modifier,
+    onRegisterClick: () -> Unit
 ) {
     val annotatedString = buildAnnotatedString {
         withStyle(
@@ -169,7 +189,7 @@ private fun LoginPrompt(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         ) {
-            append(stringResource(id = R.string.already_have_an_account) + " ")
+            append(stringResource(id = R.string.dont_have_an_account) + " ")
             withLink(
                 LinkAnnotation.Clickable(
                     tag = "clickable_text",
@@ -181,109 +201,33 @@ private fun LoginPrompt(
                         )
                     ),
                     linkInteractionListener = LinkInteractionListener {
-                        onLoginClick
+                        onRegisterClick()
                     }
                 )
             ) {
-                append(stringResource(id = R.string.login))
+                append(stringResource(id = R.string.sign_up))
             }
         }
     }
-    Text(
+
+    Box(
         modifier = modifier,
-        text = annotatedString,
-        style = MaterialTheme.typography.bodyMedium
-    )
-}
-
-@Composable
-private fun PasswordRequirements(
-    validationState: PasswordValidationState,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        PasswordRequirement(
-            text = stringResource(
-                id = R.string.at_least_x_characters,
-                UserDataValidator.MIN_PASSWORD_LENGTH
-            ),
-            isValid = validationState.hasMinLength
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-
-        PasswordRequirement(
-            text = stringResource(id = R.string.at_least_one_number),
-            isValid = validationState.hasNumber
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-
-        PasswordRequirement(
-            text = stringResource(id = R.string.contains_lowercase_char),
-            isValid = validationState.hasLowerCaseCharacter
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-
-        PasswordRequirement(
-            text = stringResource(id = R.string.contains_uppercase_char),
-            isValid = validationState.hasUpperCaseCharacter
-        )
-    }
-}
-
-@Composable
-private fun PasswordRequirement(
-    text: String,
-    isValid: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        contentAlignment = Alignment.BottomCenter
     ) {
-        Icon(
-            imageVector = if (isValid) {
-                CheckIcon
-            } else {
-                CrossIcon
-            },
-            contentDescription = null,
-            tint = if(isValid) RuniqueGreen else RuniqueDarkRed
-        )
-        Spacer(modifier = Modifier.width(16.dp))
         Text(
-            text = text,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 14.sp
+            text = annotatedString,
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
 
-@Composable
-private fun RegisterButton(
-    modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
-    enabled: Boolean = false,
-    onRegisterClick: () -> Unit
-) {
-    RuniqueActionButton(
-        text = stringResource(id = R.string.register),
-        isLoading = isLoading,
-        enabled = enabled,
-        modifier = modifier.fillMaxWidth(),
-        onClick = onRegisterClick
-    )
-}
 
 @Preview
 @Composable
-private fun RegisterScreenPreview() {
+private fun LoginScreenPreview() {
     RuniqueTheme {
-        RegisterScreen(
-            state = RegisterState(
-                passwordValidationState = PasswordValidationState(
-                    hasNumber = true,
-                )
-            ),
+        LoginScreen(
+            state = LoginState(),
             onAction = {}
         )
     }

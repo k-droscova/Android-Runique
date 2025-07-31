@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.drosckar.auth.presentation.intro.IntroScreenRoot
+import com.example.drosckar.auth.presentation.login.LoginScreenRoot
 import com.example.drosckar.auth.presentation.register.RegisterScreenRoot
 
 
@@ -55,7 +56,27 @@ private fun NavGraphBuilder.authGraph(navController: NavHostController) {
             )
         }
         composable("login") {
-            Text(text = "Login")
+            LoginScreenRoot(
+                onLoginSuccess = {
+                    navController.navigate("run") {
+                        popUpTo("auth") {
+                            inclusive = true
+                        }
+                    }
+                },
+                onSignUpClick = {
+                    navController.navigate("register") {
+                        popUpTo("login") {
+                            inclusive = true
+                            saveState = true
+                        }
+                        restoreState = true
+                    }
+                }
+            )
+        }
+        composable("run") {
+            Text("Run")
         }
     }
 }
