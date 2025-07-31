@@ -110,11 +110,9 @@ private fun RegisterScreen(
                 .imePadding()
         ) {
             Headline()
-            LoginPrompt(
-                onLoginClick = {
-                    onAction(RegisterAction.OnLoginClick)
-                }
-            )
+            LoginPrompt {
+                onAction(RegisterAction.OnLoginClick)
+            }
             Spacer(modifier = Modifier.height(48.dp))
             EmailTextField(
                 modifier = Modifier.bringIntoViewOnFocus(),
@@ -137,7 +135,7 @@ private fun RegisterScreen(
             Spacer(modifier = Modifier.height(32.dp))
             RegisterButton(
                 isLoading = state.isRegistering,
-                enabled = state.canRegister,
+                enabled = state.canRegister && !state.isRegistering,
                 onRegisterClick = {
                     onAction(RegisterAction.OnRegisterClick)
                 }
@@ -181,7 +179,7 @@ private fun LoginPrompt(
                         )
                     ),
                     linkInteractionListener = LinkInteractionListener {
-                        onLoginClick
+                        onLoginClick()
                     }
                 )
             ) {

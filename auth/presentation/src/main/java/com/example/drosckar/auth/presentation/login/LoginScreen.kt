@@ -124,7 +124,7 @@ private fun LoginScreen(
 
             LoginButton(
                 isLoading = state.isLoggingIn,
-                enabled = state.canLogin,
+                enabled = state.canLogin && !state.isLoggingIn,
                 onLoginClick = {
                     onAction(LoginAction.OnLoginClick)
                 }
