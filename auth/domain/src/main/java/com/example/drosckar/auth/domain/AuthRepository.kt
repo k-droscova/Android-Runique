@@ -19,5 +19,14 @@ interface AuthRepository {
      * @return [EmptyResult] indicating success or a specific [DataError.Network] failure.
      */
     suspend fun register(email: String, password: String): EmptyResult<DataError.Network>
+    /**
+     * Attempts to log in the user with the given credentials.
+     *
+     * Stores tokens and user info in session storage on success.
+     *
+     * @param email The user's email address.
+     * @param password The user's password.
+     * @return A [Result] indicating success or failure.
+     */
     suspend fun login(email: String, password: String): EmptyResult<DataError.Network>
 }

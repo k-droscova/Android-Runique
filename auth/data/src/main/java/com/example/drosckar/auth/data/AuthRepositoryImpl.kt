@@ -33,6 +33,12 @@ class AuthRepositoryImpl(
             body = RegisterRequest(email, password)
         )
     }
+    /**
+     * Logs in the user by making a POST request to the backend.
+     * If successful, stores the access and refresh tokens in [SessionStorage].
+     *
+     * @return A [Result] with [Unit] on success, or a [DataError.Network] on failure.
+     */
     override suspend fun login(email: String, password: String): EmptyResult<DataError.Network> {
         val result = httpClient.post<LoginRequest, LoginResponse>(
             route = "/login",

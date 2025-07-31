@@ -19,18 +19,41 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel responsible for handling login UI state and user actions.
+ *
+ * Coordinates validation, manages loading state, and emits UI events (e.g., login success or errors).
+ *
+ * @param authRepository Repository providing authentication logic (login API call).
+ * @param userDataValidator Utility for validating email input.
+ */
 class LoginViewModel(
     private val authRepository: AuthRepository,
     private val userDataValidator: UserDataValidator
 ) : ViewModel() {
 
+    /**
+     * Publicly exposed immutable state of the login screen.
+     */
     var state by mutableStateOf(LoginState())
         private set
 
+    /**
+     * Channel used to emit one-time UI events (e.g., navigation, error messages).
+     */
     private val eventChannel = Channel<LoginEvent>()
+    /**
+     * Flow of login events collected in the UI to react to login outcomes.
+     */
     val events = eventChannel.receiveAsFlow()
 
     init {
+        /**
+         * Observe changes to email and password fields and update `canLogin` accordingly.
+         *
+         * Only allows login if the email is valid and password is not empty.
+         * Runs every time either email or password changes.
+         */
         combine(state.email.textAsFlow(), state.password.textAsFlow()) { email, password ->
             state = state.copy(
                 canLogin = userDataValidator.isValidEmail(
@@ -40,6 +63,11 @@ class LoginViewModel(
         }.launchIn(viewModelScope)
     }
 
+    /**
+     * Handles user actions from the login UI.
+     *
+     * @param action The user interaction to process.
+     */
     fun onAction(action: LoginAction) {
         when(action) {
             LoginAction.OnLoginClick -> login()
@@ -48,30 +76,43 @@ class LoginViewModel(
                     isPasswordVisible = !state.isPasswordVisible
                 )
             }
-            else -> Unit
+            else -> Unit // Other actions (e.g., navigation) may be handled in the UI layer.
         }
     }
 
+    /**
+     * Performs the login process by calling the repository and updating state/UI accordingly.
+     *
+     * - Shows loading indicator.
+     * - Calls `authRepository.login(...)`.
+     * - Emits error or success event based on the result.
+     */
     private fun login() {
         viewModelScope.launch {
+            // Show loading indicator
             state = state.copy(isLoggingIn = true)
+            // Perform login request
             val result = authRepository.login(
                 email = state.email.text.toString().trim(),
                 password = state.password.text.toString()
             )
+            // Hide loading indicator
             state = state.copy(isLoggingIn = false)
-
+            // Handle result
             when(result) {
                 is Result.Error -> {
                     if(result.error == DataError.Network.UNAUTHORIZED) {
+                        // Specific message for invalid credentials
                         eventChannel.send(LoginEvent.Error(
                             UiText.StringResource(R.string.error_email_password_incorrect)
                         ))
                     } else {
+                        // Fallback to general network error handling
                         eventChannel.send(LoginEvent.Error(result.error.asUiText()))
                     }
                 }
                 is Result.Success -> {
+                    // Login successful, notify UI to navigate forward
                     eventChannel.send(LoginEvent.LoginSuccess)
                 }
             }
