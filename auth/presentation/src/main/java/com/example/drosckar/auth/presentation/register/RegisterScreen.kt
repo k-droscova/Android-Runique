@@ -1,6 +1,5 @@
 package com.example.drosckar.auth.presentation.register
 
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,8 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.LinkInteractionListener
@@ -50,6 +47,7 @@ import com.example.drosckar.core.presentation.designsystem.components.RuniqueAct
 import com.example.drosckar.core.presentation.designsystem.components.RuniquePasswordTextField
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueTextField
 import com.example.drosckar.core.presentation.ui.bringIntoViewOnFocus
+import com.example.drosckar.core.presentation.ui.clearFocusOnTap
 import org.koin.androidx.compose.koinViewModel
 
 
@@ -70,18 +68,12 @@ private fun RegisterScreen(
     state: RegisterState,
     onAction: (RegisterAction) -> Unit
 ) {
-    val focusManager = LocalFocusManager.current
-
     GradientBackground {
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .fillMaxSize()
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        focusManager.clearFocus()
-                    })
-                }
+                .clearFocusOnTap()
                 .padding(horizontal = 16.dp)
                 .padding(vertical = 32.dp)
                 .padding(top = 16.dp)
