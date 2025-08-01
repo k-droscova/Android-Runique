@@ -9,6 +9,7 @@ import androidx.navigation.navigation
 import com.example.drosckar.auth.presentation.intro.IntroScreenRoot
 import com.example.drosckar.auth.presentation.login.LoginScreenRoot
 import com.example.drosckar.auth.presentation.register.RegisterScreenRoot
+import com.example.drosckar.run.presentation.active_run.ActiveRunScreenRoot
 import com.example.drosckar.run.presentation.run_overview.RunOverviewScreenRoot
 
 
@@ -86,7 +87,18 @@ private fun NavGraphBuilder.runGraph(navController: NavHostController) {
         route = "run"
     ) {
         composable("run_overview") {
-            RunOverviewScreenRoot()
+            RunOverviewScreenRoot(
+                onStartRunClick = {
+                    navController.navigate("active_run")
+                }
+            )
+        }
+        composable("active_run") {
+            ActiveRunScreenRoot(
+                onBackClick = {
+                    navController.navigateUp()
+                }
+            )
         }
     }
 }
