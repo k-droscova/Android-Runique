@@ -9,4 +9,9 @@
     <string name="duration">Uplynulý čas</string>
     <string name="distance">Vzdálenost</string>
     <string name="pace">Tempo</string>
+    <string name="permission_required">Je vyžadováno oprávnění</string>
+    <string name="location_notification_rationale">Aby bylo možné sledovat vaši polohu a zobrazit aktuální čas v oznámení, aplikace k tomu potřebuje vaše oprávnění. Klikněte prosím na „OK“ pro jeho udělení.</string>
+    <string name="location_rationale">Aby bylo možné sledovat vaši polohu, aplikace k tomu potřebuje vaše oprávnění. Klikněte prosím na „OK“ pro jeho udělení.</string>
+    <string name="notification_rationale">Aby bylo možné zobrazit aktuální čas v oznámení, aplikace k tomu potřebuje vaše oprávnění. Klikněte prosím na „OK“ pro jeho udělení.</string>
+    <string name="okay">OK</string>
 </resources>

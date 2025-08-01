@@ -5,25 +5,69 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 
 /**
- * ViewModel for handling state and logic of an active running session.
+ * ViewModel for handling business logic and UI state of the Active Run screen.
+ *
+ * Manages user actions, state updates, and one-off UI events such as dialogs or navigation.
  */
 class ActiveRunViewModel : ViewModel() {
 
-    // Current screen state
+    /** Current observable state of the Active Run screen. */
     var state by mutableStateOf(ActiveRunState())
         private set
 
-    // One-time events (e.g., showing a snackbar or navigating away)
+    /** Channel for one-time UI events (e.g., showing snackbar, navigation). */
     private val eventChannel = Channel<ActiveRunEvent>()
+
+    /** Publicly exposed flow of one-time events. */
     val events = eventChannel.receiveAsFlow()
 
+    /** Whether the app currently has location permission. */
+    private val _hasLocationPermission = MutableStateFlow(false)
+
     /**
-     * Handles user actions from the UI. Currently not implemented.
+     * Handles user-triggered actions from the UI.
+     *
+     * @param action The user action to handle.
      */
     fun onAction(action: ActiveRunAction) {
-        // TODO: Implement logic for start/stop/pause/save tracking
+        when (action) {
+            ActiveRunAction.OnFinishRunClick -> {
+                // TODO: Handle run completion
+            }
+
+            ActiveRunAction.OnResumeRunClick -> {
+                // TODO: Handle resuming a paused run
+            }
+
+            ActiveRunAction.OnToggleRunClick -> {
+                // TODO: Handle toggling start/pause tracking
+            }
+
+            is ActiveRunAction.SubmitLocationPermissionInfo -> {
+                _hasLocationPermission.value = action.acceptedLocationPermission
+                state = state.copy(
+                    showLocationRationale = action.showLocationRationale
+                )
+            }
+
+            is ActiveRunAction.SubmitNotificationPermissionInfo -> {
+                state = state.copy(
+                    showNotificationRationale = action.showNotificationPermissionRationale
+                )
+            }
+
+            is ActiveRunAction.DismissRationaleDialog -> {
+                state = state.copy(
+                    showNotificationRationale = false,
+                    showLocationRationale = false
+                )
+            }
+
+            else -> Unit
+        }
     }
 }

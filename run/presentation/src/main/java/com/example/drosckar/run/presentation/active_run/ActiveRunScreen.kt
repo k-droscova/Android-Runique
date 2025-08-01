@@ -2,6 +2,13 @@
 
 package com.example.drosckar.run.presentation.active_run
 
+import android.Manifest
+import android.content.Context
+import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,18 +17,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.drosckar.core.presentation.designsystem.RuniqueTheme
 import com.example.drosckar.core.presentation.designsystem.StartIcon
 import com.example.drosckar.core.presentation.designsystem.StopIcon
+import com.example.drosckar.core.presentation.designsystem.components.RuniqueDialog
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueFloatingActionButton
+import com.example.drosckar.core.presentation.designsystem.components.RuniqueOutlinedActionButton
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueScaffold
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueToolbar
 import com.example.drosckar.run.presentation.R
 import com.example.drosckar.run.presentation.active_run.components.RunDataCard
+import com.example.drosckar.run.presentation.util.hasLocationPermission
+import com.example.drosckar.run.presentation.util.hasNotificationPermission
+import com.example.drosckar.run.presentation.util.shouldShowLocationPermissionRationale
+import com.example.drosckar.run.presentation.util.shouldShowNotificationPermissionRationale
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -47,13 +62,33 @@ fun ActiveRunScreenRoot(
 
 /**
  * Main layout for the Active Run screen.
- * Displays top bar, FAB, and the run data card.
+ *
+ * Displays the top bar, floating action button (FAB), and a card showing run data.
+ * Also handles runtime permission requests (location and notification) and
+ * conditionally shows rationale dialogs if needed.
+ *
+ * @param state Current UI state of the active run.
+ * @param onAction Callback for dispatching user actions (e.g., permission grants, toggling run).
  */
 @Composable
 private fun ActiveRunScreen(
     state: ActiveRunState,
     onAction: (ActiveRunAction) -> Unit
 ) {
+    val context = LocalContext.current
+
+    // Launcher for requesting multiple permissions at once.
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { perms ->
+        handlePermissionResults(perms, context, onAction)
+    }
+
+    // On first composition, determine initial permission states and launch requests if needed.
+    LaunchedEffect(key1 = true) {
+        initializePermissionState(context, onAction, permissionLauncher)
+    }
+
     RuniqueScaffold(
         withGradient = false,
         topAppBar = {
@@ -98,6 +133,160 @@ private fun ActiveRunScreen(
                     .fillMaxWidth()
             )
         }
+    }
+
+    // Show rationale dialog if any permission rationale is required.
+    PermissionRationaleDialog(
+        showLocationRationale = state.showLocationRationale,
+        showNotificationRationale = state.showNotificationRationale,
+        onOkayClick = {
+            onAction(ActiveRunAction.DismissRationaleDialog)
+            permissionLauncher.requestRuniquePermissions(context)
+        }
+    )
+}
+
+/**
+ * Dialog displayed when the user needs to understand why location or notification permissions are required.
+ *
+ * Only shown if one or both rationale flags are true.
+ *
+ * @param showLocationRationale Whether to show location permission rationale.
+ * @param showNotificationRationale Whether to show notification permission rationale.
+ * @param onOkayClick Action to take when user agrees to grant permissions.
+ */
+@Composable
+private fun PermissionRationaleDialog(
+    showLocationRationale: Boolean,
+    showNotificationRationale: Boolean,
+    onOkayClick: () -> Unit
+) {
+    if (!showLocationRationale && !showNotificationRationale) return
+
+    val description = when {
+        showLocationRationale && showNotificationRationale -> {
+            stringResource(id = R.string.location_notification_rationale)
+        }
+        showLocationRationale -> {
+            stringResource(id = R.string.location_rationale)
+        }
+        else -> {
+            stringResource(id = R.string.notification_rationale)
+        }
+    }
+
+    RuniqueDialog(
+        title = stringResource(id = R.string.permission_required),
+        onDismiss = { /* Dismiss manually only via OK click */ },
+        description = description,
+        primaryButton = {
+            RuniqueOutlinedActionButton(
+                text = stringResource(id = R.string.okay),
+                isLoading = false,
+                onClick = onOkayClick
+            )
+        }
+    )
+}
+
+/**
+ * Handles the result of the permission request and dispatches relevant actions.
+ *
+ * @param perms Map of granted/denied permissions.
+ * @param context Context used to determine if rationale should still be shown.
+ * @param onAction Callback to dispatch permission-related actions.
+ */
+private fun handlePermissionResults(
+    perms: Map<String, Boolean>,
+    context: Context,
+    onAction: (ActiveRunAction) -> Unit
+) {
+    val activity = context as ComponentActivity
+
+    val hasCourseLocationPermission = perms[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+    val hasFineLocationPermission = perms[Manifest.permission.ACCESS_FINE_LOCATION] == true
+    val hasNotificationPermission = if (Build.VERSION.SDK_INT >= 33) {
+        perms[Manifest.permission.POST_NOTIFICATIONS] == true
+    } else true
+
+    onAction(
+        ActiveRunAction.SubmitLocationPermissionInfo(
+            acceptedLocationPermission = hasCourseLocationPermission && hasFineLocationPermission,
+            showLocationRationale = activity.shouldShowLocationPermissionRationale()
+        )
+    )
+
+    onAction(
+        ActiveRunAction.SubmitNotificationPermissionInfo(
+            acceptedNotificationPermission = hasNotificationPermission,
+            showNotificationPermissionRationale = activity.shouldShowNotificationPermissionRationale()
+        )
+    )
+}
+
+/**
+ * Initializes the permission state by checking which permissions are granted or require a rationale.
+ * If no rationale is needed, automatically launches the permission request.
+ *
+ * @param context The current context.
+ * @param onAction Callback to dispatch permission info actions.
+ * @param permissionLauncher Launcher to trigger permission request dialog.
+ */
+private fun initializePermissionState(
+    context: Context,
+    onAction: (ActiveRunAction) -> Unit,
+    permissionLauncher: ActivityResultLauncher<Array<String>>
+) {
+    val activity = context as ComponentActivity
+
+    val showLocationRationale = activity.shouldShowLocationPermissionRationale()
+    val showNotificationRationale = activity.shouldShowNotificationPermissionRationale()
+
+    onAction(
+        ActiveRunAction.SubmitLocationPermissionInfo(
+            acceptedLocationPermission = context.hasLocationPermission(),
+            showLocationRationale = showLocationRationale
+        )
+    )
+    onAction(
+        ActiveRunAction.SubmitNotificationPermissionInfo(
+            acceptedNotificationPermission = context.hasNotificationPermission(),
+            showNotificationPermissionRationale = showNotificationRationale
+        )
+    )
+
+    if (!showLocationRationale && !showNotificationRationale) {
+        permissionLauncher.requestRuniquePermissions(context)
+    }
+}
+
+/**
+ * Extension function to simplify launching location and notification permissions.
+ *
+ * Automatically handles Android 13+ notification permission separately.
+ *
+ * @param context Used to check existing permission states.
+ */
+private fun ActivityResultLauncher<Array<String>>.requestRuniquePermissions(
+    context: Context
+) {
+    val hasLocationPermission = context.hasLocationPermission()
+    val hasNotificationPermission = context.hasNotificationPermission()
+
+    val locationPermissions = arrayOf(
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    )
+    val notificationPermission = if(Build.VERSION.SDK_INT >= 33) {
+        arrayOf(Manifest.permission.POST_NOTIFICATIONS)
+    } else arrayOf()
+
+    when {
+        !hasLocationPermission && !hasNotificationPermission -> {
+            launch(locationPermissions + notificationPermission)
+        }
+        !hasLocationPermission -> launch(locationPermissions)
+        !hasNotificationPermission -> launch(notificationPermission)
     }
 }
 
