@@ -2,4 +2,6 @@
 <resources>
     <string name="show_password">Ukázat heslo</string>
     <string name="hide_password">Schovat heslo</string>
+    <string name="go_back">Zpět</string>
+    <string name="open_menu">Otevřít menu</string>
 </resources>

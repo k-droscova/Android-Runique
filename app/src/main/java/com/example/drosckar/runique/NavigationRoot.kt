@@ -1,6 +1,5 @@
 package com.example.drosckar.runique
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -10,6 +9,7 @@ import androidx.navigation.navigation
 import com.example.drosckar.auth.presentation.intro.IntroScreenRoot
 import com.example.drosckar.auth.presentation.login.LoginScreenRoot
 import com.example.drosckar.auth.presentation.register.RegisterScreenRoot
+import com.example.drosckar.run.presentation.run_overview.RunOverviewScreenRoot
 
 
 @Composable
@@ -86,7 +86,7 @@ private fun NavGraphBuilder.runGraph(navController: NavHostController) {
         route = "run"
     ) {
         composable("run_overview") {
-            Text(text = "Run overview!")
+            RunOverviewScreenRoot()
         }
     }
 }
