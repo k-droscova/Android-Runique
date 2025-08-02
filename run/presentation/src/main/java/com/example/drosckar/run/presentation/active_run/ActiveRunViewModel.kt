@@ -3,20 +3,28 @@ package com.example.drosckar.run.presentation.active_run
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drosckar.run.domain.RunningTracker
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import timber.log.Timber
 
 /**
- * ViewModel for handling business logic and UI state of the Active Run screen.
+ * ViewModel responsible for managing the business logic and UI state of the Active Run screen.
  *
- * Manages user actions, state updates, and one-off UI events such as dialogs or navigation.
+ * It handles:
+ * - Managing state for tracking runs (paused/running/resumed).
+ * - Synchronizing UI state with `RunningTracker` data (location, elapsed time, run metrics).
+ * - Handling UI actions triggered by the user.
+ * - Permission management (location access).
  */
 class ActiveRunViewModel(
     private val runningTracker: RunningTracker
@@ -32,12 +40,48 @@ class ActiveRunViewModel(
     /** Publicly exposed flow of one-time events. */
     val events = eventChannel.receiveAsFlow()
 
-    /** Whether the app currently has location permission. */
-    private val _hasLocationPermission = MutableStateFlow(false)
+    // --- STATE FLOW DERIVATIONS ---
+
+    /**
+     * Flow that reflects the current value of [state.shouldTrack], emitting updates
+     * whenever it changes.
+     *
+     * `snapshotFlow` bridges Compose state to a coroutine Flow.
+     * We use `stateIn` to convert it into a hot StateFlow for composition.
+     */
+    private val shouldTrack = snapshotFlow { state.shouldTrack }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = state.shouldTrack
+        )
+
+    /** Flow that holds the current status of whether location permissions are granted. */
+    private val hasLocationPermission = MutableStateFlow(false)
+
+    /**
+     * Combined state that determines if we should track the user's run:
+     * - The user *intends* to track (`shouldTrack`)
+     * - The app *has permission* to do so (`hasLocationPermission`)
+     *
+     * If either is false, location tracking is turned off.
+     */
+    private val isTracking = combine(
+        shouldTrack,
+        hasLocationPermission
+    ) { shouldTrack, hasPermission ->
+        shouldTrack && hasPermission
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Lazily,
+        initialValue = false
+    )
+
+    // --- INITIALIZER ---
 
     init {
-        // Start or stop observing location depending on permission status
-        _hasLocationPermission
+        // Observe permission changes and start/stop location observation accordingly
+        hasLocationPermission
             .onEach { hasPermission ->
                 if(hasPermission) {
                     runningTracker.startObservingLocation()
@@ -47,15 +91,40 @@ class ActiveRunViewModel(
             }
             .launchIn(viewModelScope)
 
-        // Log current location whenever it updates
+        // Update the tracking state in the tracker based on the derived isTracking flow
+        isTracking
+            .onEach { isTracking ->
+                runningTracker.setIsTracking(isTracking)
+            }
+            .launchIn(viewModelScope)
+
+        // Listen for location updates and push them into UI state
         runningTracker
             .currentLocation
             .onEach { location ->
                 Timber.d("New location: $location")
+                state = state.copy(currentLocation = location?.location)
+            }
+            .launchIn(viewModelScope)
+
+        // Listen for run data updates (distance, pace, recorded path) and update UI state
+        runningTracker
+            .runData
+            .onEach {
+                state = state.copy(runData = it)
+            }
+            .launchIn(viewModelScope)
+
+        // Listen for elapsed time updates and update UI state
+        runningTracker
+            .elapsedTime
+            .onEach {
+                state = state.copy(elapsedTime = it)
             }
             .launchIn(viewModelScope)
     }
 
+    // --- UI ACTION HANDLING ---
 
     /**
      * Handles user-triggered actions from the UI.
@@ -65,19 +134,26 @@ class ActiveRunViewModel(
     fun onAction(action: ActiveRunAction) {
         when (action) {
             ActiveRunAction.OnFinishRunClick -> {
-                // TODO: Handle run completion
+                // TODO: Save run, capture map, and navigate away
             }
 
             ActiveRunAction.OnResumeRunClick -> {
-                // TODO: Handle resuming a paused run
+                state = state.copy(shouldTrack = true)
+            }
+
+            ActiveRunAction.OnBackClick -> {
+                state = state.copy(shouldTrack = false)
             }
 
             ActiveRunAction.OnToggleRunClick -> {
-                // TODO: Handle toggling start/pause tracking
+                state = state.copy(
+                    hasStartedRunning = true,
+                    shouldTrack = !state.shouldTrack
+                )
             }
 
             is ActiveRunAction.SubmitLocationPermissionInfo -> {
-                _hasLocationPermission.value = action.acceptedLocationPermission
+                hasLocationPermission.value = action.acceptedLocationPermission
                 state = state.copy(
                     showLocationRationale = action.showLocationRationale
                 )
@@ -95,8 +171,6 @@ class ActiveRunViewModel(
                     showLocationRationale = false
                 )
             }
-
-            else -> Unit
         }
     }
 }
