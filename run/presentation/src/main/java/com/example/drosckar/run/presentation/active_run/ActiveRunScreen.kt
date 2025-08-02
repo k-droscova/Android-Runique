@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.example.drosckar.core.presentation.designsystem.RuniqueTheme
 import com.example.drosckar.core.presentation.designsystem.StartIcon
 import com.example.drosckar.core.presentation.designsystem.StopIcon
+import com.example.drosckar.core.presentation.designsystem.components.RuniqueActionButton
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueDialog
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueFloatingActionButton
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueOutlinedActionButton
@@ -144,6 +145,14 @@ private fun ActiveRunScreen(
         }
     }
 
+    // Show dialog when the run is paused after it has started
+    PauseRunDialog(
+        isPaused = !state.shouldTrack && state.hasStartedRunning,
+        isSavingRun = state.isSavingRun,
+        onResumeClick = { onAction(ActiveRunAction.OnResumeRunClick) },
+        onFinishClick = { onAction(ActiveRunAction.OnFinishRunClick) }
+    )
+
     // Show rationale dialog if any permission rationale is required.
     PermissionRationaleDialog(
         showLocationRationale = state.showLocationRationale,
@@ -151,6 +160,48 @@ private fun ActiveRunScreen(
         onOkayClick = {
             onAction(ActiveRunAction.DismissRationaleDialog)
             permissionLauncher.requestRuniquePermissions(context)
+        }
+    )
+}
+
+/**
+ * Dialog displayed when the run is paused after being started.
+ *
+ * Offers the user a choice to either resume or finish the run.
+ *
+ * @param isPaused Whether the run is currently paused (but has started).
+ * @param isSavingRun Whether the run is currently being saved (to show loading on "Finish").
+ * @param onResumeClick Callback when user chooses to resume the run.
+ * @param onFinishClick Callback when user chooses to finish and save the run.
+ */
+@Composable
+private fun PauseRunDialog(
+    isPaused: Boolean,
+    isSavingRun: Boolean,
+    onResumeClick: () -> Unit,
+    onFinishClick: () -> Unit
+) {
+    if (!isPaused) return
+
+    RuniqueDialog(
+        title = stringResource(id = R.string.running_is_paused),
+        onDismiss = onResumeClick, // Auto-resume if user tries to dismiss manually
+        description = stringResource(id = R.string.resume_or_finish_run),
+        primaryButton = {
+            RuniqueActionButton(
+                text = stringResource(id = R.string.resume),
+                isLoading = false,
+                onClick = onResumeClick,
+                modifier = Modifier.weight(1f)
+            )
+        },
+        secondaryButton = {
+            RuniqueOutlinedActionButton(
+                text = stringResource(id = R.string.finish),
+                isLoading = isSavingRun,
+                onClick = onFinishClick,
+                modifier = Modifier.weight(1f)
+            )
         }
     )
 }
