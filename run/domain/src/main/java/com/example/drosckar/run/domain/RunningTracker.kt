@@ -76,6 +76,18 @@ class RunningTracker(
     init {
         // Track elapsed time only when actively tracking a run
         isTracking
+            // when switch from true to false, add empty list to the end of the list
+            .onEach { isTracking ->
+                if(!isTracking) {
+                    val newList = buildList {
+                        addAll(runData.value.locations)
+                        add(emptyList<LocationTimestamp>())
+                    }.toList()
+                    _runData.update {
+                        it.copy(locations = newList)
+                    }
+                }
+            }
             .flatMapLatest { isTracking ->
                 if(isTracking) {
                     Timer.timeAndEmit()

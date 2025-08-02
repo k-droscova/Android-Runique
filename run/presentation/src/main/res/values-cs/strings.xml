@@ -14,4 +14,8 @@
     <string name="location_rationale">Aby bylo možné sledovat vaši polohu, aplikace k tomu potřebuje vaše oprávnění. Klikněte prosím na „OK“ pro jeho udělení.</string>
     <string name="notification_rationale">Aby bylo možné zobrazit aktuální čas v oznámení, aplikace k tomu potřebuje vaše oprávnění. Klikněte prosím na „OK“ pro jeho udělení.</string>
     <string name="okay">OK</string>
+    <string name="running_is_paused">Běh je pozastaven</string>
+    <string name="resume_or_finish_run">Chceš pokračovat či ukončit běh?</string>
+    <string name="resume">Pokračovat</string>
+    <string name="finish">Ukončit</string>
 </resources>
