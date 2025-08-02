@@ -113,6 +113,7 @@ fun TrackerMap(
             zoomControlsEnabled = false // Disable + / - buttons to prevent zoom manipulation
         )
     ) {
+        RuniquePolylines(locations = locations)
         // Show the animated custom marker (only if the run is active and location is valid)
         if(!isRunFinished && currentLocation != null) {
             MarkerComposable(
