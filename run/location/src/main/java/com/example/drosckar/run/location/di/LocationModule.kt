@@ -1,0 +1,11 @@
+package com.example.drosckar.run.location.di
+
+import com.example.drosckar.run.domain.LocationObserver
+import com.example.drosckar.run.location.AndroidLocationObserver
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
+import org.koin.dsl.module
+
+val locationModule = module {
+    singleOf(::AndroidLocationObserver).bind<LocationObserver>()
+}
