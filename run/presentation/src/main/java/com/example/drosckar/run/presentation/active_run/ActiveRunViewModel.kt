@@ -4,16 +4,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.drosckar.run.domain.RunningTracker
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
+import timber.log.Timber
 
 /**
  * ViewModel for handling business logic and UI state of the Active Run screen.
  *
  * Manages user actions, state updates, and one-off UI events such as dialogs or navigation.
  */
-class ActiveRunViewModel : ViewModel() {
+class ActiveRunViewModel(
+    private val runningTracker: RunningTracker
+) : ViewModel() {
 
     /** Current observable state of the Active Run screen. */
     var state by mutableStateOf(ActiveRunState())
@@ -27,6 +34,28 @@ class ActiveRunViewModel : ViewModel() {
 
     /** Whether the app currently has location permission. */
     private val _hasLocationPermission = MutableStateFlow(false)
+
+    init {
+        // Start or stop observing location depending on permission status
+        _hasLocationPermission
+            .onEach { hasPermission ->
+                if(hasPermission) {
+                    runningTracker.startObservingLocation()
+                } else {
+                    runningTracker.stopObservingLocation()
+                }
+            }
+            .launchIn(viewModelScope)
+
+        // Log current location whenever it updates
+        runningTracker
+            .currentLocation
+            .onEach { location ->
+                Timber.d("New location: $location")
+            }
+            .launchIn(viewModelScope)
+    }
+
 
     /**
      * Handles user-triggered actions from the UI.
