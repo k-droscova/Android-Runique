@@ -51,6 +51,24 @@ fun Duration.toFormattedPace(distanceKm: Double): String {
 }
 
 /**
+ * Converts a [Double] representing speed (km/h) to a formatted string rounded to 1 decimal place.
+ *
+ * Example: `10.324` -> `"10.3 km/h"`
+ */
+fun Double.toFormattedKmh(): String {
+    return "${roundToDecimals(1)} km/h"
+}
+
+/**
+ * Converts an [Int] representing distance (meters) to a formatted string.
+ *
+ * Example: `150` -> `"150 m"`
+ */
+fun Int.toFormattedMeters(): String {
+    return "$this m"
+}
+
+/**
  * Rounds a [Double] to a specified number of decimal places.
  *
  * @param decimalCount The number of decimal places to round to.
