@@ -45,7 +45,8 @@ class RunningTracker(
     val runData = _runData.asStateFlow()
 
     // Whether we're actively tracking a run (used to trigger timer + data collection)
-    private val isTracking = MutableStateFlow(false)
+    private val _isTracking = MutableStateFlow(false)
+    val isTracking = _isTracking.asStateFlow()
 
     // Mutable flag controlling whether we are tracking the user's location
     private val isObservingLocation = MutableStateFlow(false)
@@ -75,7 +76,7 @@ class RunningTracker(
 
     init {
         // Track elapsed time only when actively tracking a run
-        isTracking
+        _isTracking
             // when switch from true to false, add empty list to the end of the list
             .onEach { isTracking ->
                 if(!isTracking) {
@@ -101,7 +102,7 @@ class RunningTracker(
         // Chain of flow operators to track user path and update metrics reactively
         currentLocation
             .filterNotNull() // Ignore null locations
-            .combineTransform(isTracking) { location, isTracking ->
+            .combineTransform(_isTracking) { location, isTracking ->
                 if(isTracking) {
                     emit(location)
                 }
@@ -151,7 +152,7 @@ class RunningTracker(
      * When set to true, starts accumulating time and updating run data.
      */
     fun setIsTracking(isTracking: Boolean) {
-        this.isTracking.value = isTracking
+        this._isTracking.value = isTracking
     }
 
     /** Begin passive location observation (e.g. for displaying user position on map). */

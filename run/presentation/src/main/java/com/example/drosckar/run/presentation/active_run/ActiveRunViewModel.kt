@@ -7,6 +7,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drosckar.run.domain.RunningTracker
+import com.example.drosckar.run.presentation.active_run.service.ActiveRunService
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,7 +32,10 @@ class ActiveRunViewModel(
 ) : ViewModel() {
 
     /** Current observable state of the Active Run screen. */
-    var state by mutableStateOf(ActiveRunState())
+    var state by mutableStateOf(ActiveRunState(
+        shouldTrack = ActiveRunService.isServiceActive && runningTracker.isTracking.value,
+        hasStartedRunning = ActiveRunService.isServiceActive
+    ))
         private set
 
     /** Channel for one-time UI events (e.g., showing snackbar, navigation). */
@@ -171,6 +175,13 @@ class ActiveRunViewModel(
                     showLocationRationale = false
                 )
             }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        if(!ActiveRunService.isServiceActive) {
+            runningTracker.stopObservingLocation()
         }
     }
 }
