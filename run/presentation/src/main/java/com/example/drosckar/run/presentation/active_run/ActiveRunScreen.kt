@@ -35,6 +35,7 @@ import com.example.drosckar.core.presentation.designsystem.components.RuniqueToo
 import com.example.drosckar.run.presentation.R
 import com.example.drosckar.run.presentation.active_run.components.RunDataCard
 import com.example.drosckar.run.presentation.active_run.maps.TrackerMap
+import com.example.drosckar.run.presentation.active_run.service.ActiveRunService
 import com.example.drosckar.run.presentation.util.hasLocationPermission
 import com.example.drosckar.run.presentation.util.hasNotificationPermission
 import com.example.drosckar.run.presentation.util.shouldShowLocationPermissionRationale
@@ -48,10 +49,12 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ActiveRunScreenRoot(
     onBackClick: () -> Unit,
+    onServiceToggle: (isServiceRunning: Boolean) -> Unit,
     viewModel: ActiveRunViewModel = koinViewModel(),
 ) {
     ActiveRunScreen(
         state = viewModel.state,
+        onServiceToggle = onServiceToggle,
         onAction = { action ->
             // Handle back navigation only if user hasn't started running yet
             if (action is ActiveRunAction.OnBackClick && !viewModel.state.hasStartedRunning) {
@@ -75,6 +78,7 @@ fun ActiveRunScreenRoot(
 @Composable
 private fun ActiveRunScreen(
     state: ActiveRunState,
+    onServiceToggle: (isServiceRunning: Boolean) -> Unit,
     onAction: (ActiveRunAction) -> Unit
 ) {
     val context = LocalContext.current
@@ -89,6 +93,18 @@ private fun ActiveRunScreen(
     // On first composition, determine initial permission states and launch requests if needed.
     LaunchedEffect(key1 = true) {
         initializePermissionState(context, onAction, permissionLauncher)
+    }
+
+    LaunchedEffect(key1 = state.isRunFinished) {
+        if(state.isRunFinished) {
+            onServiceToggle(false)
+        }
+    }
+
+    LaunchedEffect(key1 = state.shouldTrack) {
+        if(context.hasLocationPermission() && state.shouldTrack && !ActiveRunService.isServiceActive) {
+            onServiceToggle(true)
+        }
     }
 
     RuniqueScaffold(
@@ -356,6 +372,7 @@ private fun ActiveRunScreenPreview() {
     RuniqueTheme {
         ActiveRunScreen(
             state = ActiveRunState(),
+            onServiceToggle = {},
             onAction = {}
         )
     }
