@@ -6,8 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.drosckar.core.domain.util.Result
 import com.example.drosckar.core.domain.location.Location
 import com.example.drosckar.core.domain.run.Run
+import com.example.drosckar.core.domain.run.RunRepository
+import com.example.drosckar.core.presentation.ui.asUiText
 import com.example.drosckar.run.domain.LocationDataCalculator
 import com.example.drosckar.run.domain.RunningTracker
 import com.example.drosckar.run.presentation.active_run.service.ActiveRunService
@@ -34,7 +37,8 @@ import java.time.ZonedDateTime
  * - Permission management (location access).
  */
 class ActiveRunViewModel(
-    private val runningTracker: RunningTracker
+    private val runningTracker: RunningTracker,
+    private val runRepository: RunRepository,
 ) : ViewModel() {
 
     /** Current observable state of the Active Run screen. */
@@ -218,9 +222,17 @@ class ActiveRunViewModel(
                 mapPictureUrl = null
             )
 
-            // Save run in repository
-
             runningTracker.finishRun()
+
+            when(val result = runRepository.upsertRun(run, mapPictureBytes)) {
+                is Result.Error -> {
+                    eventChannel.send(ActiveRunEvent.Error(result.error.asUiText()))
+                }
+                is Result.Success -> {
+                    eventChannel.send(ActiveRunEvent.RunSaved)
+                }
+            }
+
             state = state.copy(isSavingRun = false)
         }
     }

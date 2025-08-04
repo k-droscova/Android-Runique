@@ -6,6 +6,7 @@ import com.example.drosckar.auth.presentation.di.authViewModelModule
 import com.example.drosckar.core.data.di.coreDataModule
 import com.example.drosckar.core.database.di.databaseModule
 import com.example.drosckar.run.location.di.locationModule
+import com.example.drosckar.run.network.di.networkModule
 import com.example.drosckar.run.presentation.di.runPresentationModule
 import com.example.drosckar.runique.di.appModule
 import kotlinx.coroutines.CoroutineScope
@@ -47,6 +48,7 @@ class RuniqueApp: Application() {
                 runPresentationModule,
                 locationModule,
                 databaseModule,
+                networkModule
             )
         }
     }
