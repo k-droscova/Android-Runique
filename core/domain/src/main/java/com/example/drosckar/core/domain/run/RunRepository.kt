@@ -32,4 +32,37 @@ interface RunRepository {
      * Deletes a run both locally and remotely.
      */
     suspend fun deleteRun(id: RunId)
+
+    /**
+     * Attempts to synchronize any locally stored, unsynced run operations
+     * (creations or deletions) with the remote API.
+     *
+     * - Syncs runs created locally while offline.
+     * - Syncs deletion requests that failed while offline.
+     * - Ensures these changes are reflected on the backend before fetching fresh data.
+     *//**
+     * Attempts to synchronize any locally stored, unsynced run operations
+     * (creations or deletions) with the remote API.
+     *
+     * - Syncs runs created locally while offline.
+     * - Syncs deletion requests that failed while offline.
+     * - Ensures these changes are reflected on the backend before fetching fresh data.
+     */
+    suspend fun syncPendingRuns()
+
+    /**
+     * Deletes all runs stored locally.
+     * Used primarily when logging out to clear data of the previous user.
+     */
+    suspend fun deleteAllRuns()
+
+    /**
+     * Logs out the currently authenticated user.
+     *
+     * This:
+     * - Invalidates the session token on the backend.
+     * - Clears the in-memory token used by Ktor.
+     * - Used in the run feature (not auth feature) since it concerns run data lifecycle.
+     */
+    suspend fun logout(): EmptyResult<DataError.Network>
 }
