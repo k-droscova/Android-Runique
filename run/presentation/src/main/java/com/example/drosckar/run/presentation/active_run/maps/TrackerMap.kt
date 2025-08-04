@@ -38,8 +38,10 @@ import com.example.drosckar.core.presentation.designsystem.RunIcon
 import com.example.drosckar.run.presentation.R
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.MapEffect
+import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.ktx.awaitSnapshot
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -58,6 +60,7 @@ import kotlinx.coroutines.launch
  * @param onSnapshot Callback invoked with a Bitmap when a snapshot of the map is taken (used later).
  * @param modifier Optional Modifier for layout purposes.
  */
+@OptIn(DelicateCoroutinesApi::class, MapsComposeExperimentalApi::class)
 @Composable
 fun TrackerMap(
     isRunFinished: Boolean,
