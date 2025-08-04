@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.drosckar.auth.data.di.authDataModule
 import com.example.drosckar.auth.presentation.di.authViewModelModule
 import com.example.drosckar.core.data.di.coreDataModule
+import com.example.drosckar.core.database.di.databaseModule
 import com.example.drosckar.run.location.di.locationModule
 import com.example.drosckar.run.presentation.di.runPresentationModule
 import com.example.drosckar.runique.di.appModule
@@ -45,6 +46,7 @@ class RuniqueApp: Application() {
                 coreDataModule,
                 runPresentationModule,
                 locationModule,
+                databaseModule,
             )
         }
     }
