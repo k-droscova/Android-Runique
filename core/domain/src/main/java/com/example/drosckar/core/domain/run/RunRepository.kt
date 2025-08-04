@@ -49,4 +49,20 @@ interface RunRepository {
      * - Ensures these changes are reflected on the backend before fetching fresh data.
      */
     suspend fun syncPendingRuns()
+
+    /**
+     * Deletes all runs stored locally.
+     * Used primarily when logging out to clear data of the previous user.
+     */
+    suspend fun deleteAllRuns()
+
+    /**
+     * Logs out the currently authenticated user.
+     *
+     * This:
+     * - Invalidates the session token on the backend.
+     * - Clears the in-memory token used by Ktor.
+     * - Used in the run feature (not auth feature) since it concerns run data lifecycle.
+     */
+    suspend fun logout(): EmptyResult<DataError.Network>
 }

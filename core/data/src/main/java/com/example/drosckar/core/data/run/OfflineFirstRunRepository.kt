@@ -1,5 +1,6 @@
 package com.example.drosckar.core.data.run
 
+import com.example.drosckar.core.data.networking.get
 import com.example.drosckar.core.database.dao.RunPendingSyncDao
 import com.example.drosckar.core.database.mappers.toRun
 import com.example.drosckar.core.domain.run.LocalRunDataSource
@@ -13,6 +14,9 @@ import com.example.drosckar.core.domain.util.EmptyResult
 import com.example.drosckar.core.domain.util.Result
 import com.example.drosckar.core.domain.util.SessionStorage
 import com.example.drosckar.core.domain.util.asEmptyDataResult
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.auth.authProvider
+import io.ktor.client.plugins.auth.providers.BearerAuthProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -37,6 +41,7 @@ class OfflineFirstRunRepository(
     private val runPendingSyncDao: RunPendingSyncDao,
     private val sessionStorage: SessionStorage,
     private val syncRunScheduler: SyncRunScheduler,
+    private val client: HttpClient,
 ) : RunRepository {
 
     /**
@@ -195,5 +200,26 @@ class OfflineFirstRunRepository(
             createJobs.forEach { it.join() }
             deleteJobs.forEach { it.join() }
         }
+    }
+
+    /**
+     * Clears all locally cached runs (used on logout).
+     * This avoids disk bloat from previously synced user data.
+     */
+    override suspend fun deleteAllRuns() {
+        localRunDataSource.deleteAllRuns()
+    }
+
+    override suspend fun logout(): EmptyResult<DataError.Network> {
+        // Call logout endpoint on the backend, which clears the token server-side
+        val result = client.get<Unit>(
+            route = "/logout"
+        ).asEmptyDataResult()
+
+        // ⚠️ Manually clear in-memory token in Ktor’s BearerAuthProvider.
+        // Otherwise, the old token would remain cached in memory even after logout.
+        client.authProvider<BearerAuthProvider>()?.clearToken()
+
+        return result
     }
 }
