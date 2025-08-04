@@ -2,7 +2,7 @@
 
 package com.example.drosckar.run.domain
 
-import com.example.drosckar.core.domain.LocationDataCalculator
+import com.example.drosckar.run.domain.LocationDataCalculator
 import com.example.drosckar.core.domain.Timer
 import com.example.drosckar.core.domain.location.LocationTimestamp
 import kotlinx.coroutines.CoroutineScope
@@ -163,6 +163,13 @@ class RunningTracker(
     /** Stop passive location observation. */
     fun stopObservingLocation() {
         isObservingLocation.value = false
+    }
+
+    fun finishRun() {
+        stopObservingLocation()
+        setIsTracking(false)
+        _elapsedTime.value = Duration.ZERO
+        _runData.value = RunData()
     }
 }
 
