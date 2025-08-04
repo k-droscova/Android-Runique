@@ -32,4 +32,21 @@ interface RunRepository {
      * Deletes a run both locally and remotely.
      */
     suspend fun deleteRun(id: RunId)
+
+    /**
+     * Attempts to synchronize any locally stored, unsynced run operations
+     * (creations or deletions) with the remote API.
+     *
+     * - Syncs runs created locally while offline.
+     * - Syncs deletion requests that failed while offline.
+     * - Ensures these changes are reflected on the backend before fetching fresh data.
+     *//**
+     * Attempts to synchronize any locally stored, unsynced run operations
+     * (creations or deletions) with the remote API.
+     *
+     * - Syncs runs created locally while offline.
+     * - Syncs deletion requests that failed while offline.
+     * - Ensures these changes are reflected on the backend before fetching fresh data.
+     */
+    suspend fun syncPendingRuns()
 }

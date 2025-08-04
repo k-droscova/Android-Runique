@@ -41,8 +41,9 @@ class RunOverviewViewModel(
             state = state.copy(runs = runsUi)
         }.launchIn(viewModelScope)
 
-        // Fetch fresh runs from the remote API on startup (one-time).
+        // Sync pending runs and fetch fresh runs from the remote API on startup (one-time).
         viewModelScope.launch {
+            runRepository.syncPendingRuns()
             runRepository.fetchRuns()
         }
     }
