@@ -112,6 +112,12 @@ private fun NavGraphBuilder.runGraph(navController: NavHostController) {
                     )
                     navController.navigateUp()
                 },
+                onFinish = {
+                    context.startService(
+                        ActiveRunService.createStopIntent(context = context)
+                    )
+                    navController.navigateUp()
+                },
                 onServiceToggle  = { shouldServiceRun ->
                     if(shouldServiceRun) {
                         context.startService(
