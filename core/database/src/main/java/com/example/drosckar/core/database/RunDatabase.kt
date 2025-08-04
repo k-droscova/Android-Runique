@@ -19,7 +19,7 @@ import com.example.drosckar.core.database.entity.RunPendingSyncEntity
         RunPendingSyncEntity::class,
         DeletedRunSyncEntity::class
     ],
-    version = 1
+    version = 2,
 )
 abstract class RunDatabase : RoomDatabase() {
 
