@@ -5,6 +5,7 @@ import com.example.drosckar.auth.data.di.authDataModule
 import com.example.drosckar.auth.presentation.di.authViewModelModule
 import com.example.drosckar.core.data.di.coreDataModule
 import com.example.drosckar.core.database.di.databaseModule
+import com.example.drosckar.run.data.di.runDataModule
 import com.example.drosckar.run.location.di.locationModule
 import com.example.drosckar.run.network.di.networkModule
 import com.example.drosckar.run.presentation.di.runPresentationModule
@@ -13,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import org.koin.androidx.workmanager.koin.workManagerFactory
 import timber.log.Timber
 import org.koin.core.context.startKoin
 
@@ -40,6 +42,7 @@ class RuniqueApp: Application() {
         startKoin {
             androidLogger() // Logs errors from Koin
             androidContext(this@RuniqueApp) // Provide application context
+            workManagerFactory() // Use WorkManager for background tasks
             modules(
                 authDataModule,
                 authViewModelModule,
@@ -48,7 +51,8 @@ class RuniqueApp: Application() {
                 runPresentationModule,
                 locationModule,
                 databaseModule,
-                networkModule
+                networkModule,
+                runDataModule,
             )
         }
     }
