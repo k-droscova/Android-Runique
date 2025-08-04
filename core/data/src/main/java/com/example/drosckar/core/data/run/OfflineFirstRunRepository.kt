@@ -7,6 +7,7 @@ import com.example.drosckar.core.domain.run.RemoteRunDataSource
 import com.example.drosckar.core.domain.run.Run
 import com.example.drosckar.core.domain.run.RunId
 import com.example.drosckar.core.domain.run.RunRepository
+import com.example.drosckar.core.domain.run.SyncRunScheduler
 import com.example.drosckar.core.domain.util.DataError
 import com.example.drosckar.core.domain.util.EmptyResult
 import com.example.drosckar.core.domain.util.Result
@@ -22,25 +23,35 @@ import kotlinx.coroutines.withContext
 /**
  * Implementation of [RunRepository] that follows the offline-first pattern.
  *
- * This class:
- * - Treats the local database as the single source of truth.
- * - Syncs data between local and remote sources.
- * - Uses [applicationScope] to safely complete critical operations
- *   even if the current coroutine scope (e.g., ViewModel) is cancelled.
+ * Responsibilities:
+ * - Uses the local Room database as the single source of truth.
+ * - Fetches and pushes data from/to the remote API.
+ * - Automatically retries failed network operations using [WorkManager]-backed scheduling.
+ * - Uses [applicationScope] to avoid premature cancellation of critical background tasks.
+ * - Maintains persistent sync state via [RunPendingSyncDao] to ensure resilience across app restarts.
  */
 class OfflineFirstRunRepository(
     private val localRunDataSource: LocalRunDataSource,
     private val remoteRunDataSource: RemoteRunDataSource,
     private val applicationScope: CoroutineScope,
     private val runPendingSyncDao: RunPendingSyncDao,
-    private val sessionStorage: SessionStorage
+    private val sessionStorage: SessionStorage,
+    private val syncRunScheduler: SyncRunScheduler,
 ) : RunRepository {
 
+    /**
+     * Returns a reactive stream of all runs stored locally.
+     * This stream reflects real-time updates and serves as the UI’s source of truth.
+     */
     override fun getRuns(): Flow<List<Run>> {
         // Always listen to the local DB as the single source of truth.
         return localRunDataSource.getRuns()
     }
 
+    /**
+     * Fetches runs from the remote server and stores them locally.
+     * Uses [applicationScope] to ensure DB writes are not cancelled mid-process.
+     */
     override suspend fun fetchRuns(): EmptyResult<DataError> {
         return when (val result = remoteRunDataSource.getRuns()) {
             is Result.Error -> result.asEmptyDataResult()
@@ -53,6 +64,11 @@ class OfflineFirstRunRepository(
         }
     }
 
+    /**
+     * Inserts or updates a run in the local DB and attempts to sync it with the server.
+     * - If local insertion fails (e.g., DB is full), the operation is aborted.
+     * - If remote upload fails (e.g., no internet), the run is scheduled for sync using [WorkManager].
+     */
     override suspend fun upsertRun(run: Run, mapPicture: ByteArray): EmptyResult<DataError> {
         val localResult = localRunDataSource.upsertRun(run)
 
@@ -72,8 +88,16 @@ class OfflineFirstRunRepository(
 
         return when (remoteResult) {
             is Result.Error -> {
-                // ❗ Not yet syncing failed posts — simply return success for now.
-                Result.Success(Unit)
+                // Schedule this run for background sync later via WorkManager
+                applicationScope.launch {
+                    syncRunScheduler.scheduleSync(
+                        type = SyncRunScheduler.SyncType.CreateRun(
+                            run = runWithId,
+                            mapPictureBytes = mapPicture
+                        )
+                    )
+                }.join()
+                Result.Success(Unit) // Pretend success; the sync will happen later
             }
             is Result.Success -> {
                 // Insert the fully processed run (with URL) into local DB.
@@ -85,6 +109,11 @@ class OfflineFirstRunRepository(
         }
     }
 
+    /**
+     * Deletes a run locally and attempts to delete it from the remote server.
+     * - If the run was never synced, we just clean up the local pending entity.
+     * - If remote deletion fails, the run is scheduled for deletion via WorkManager.
+     */
     override suspend fun deleteRun(id: RunId) {
         // Immediately delete the run from local DB.
         localRunDataSource.deleteRun(id)
@@ -97,9 +126,18 @@ class OfflineFirstRunRepository(
         }
 
         // ⚠️ Ensure remote deletion happens even if ViewModel gets destroyed.
-        applicationScope.async {
+        val remoteResult = applicationScope.async {
             remoteRunDataSource.deleteRun(id)
         }.await()
+
+        // Schedule a delete sync if it failed
+        if(remoteResult is Result.Error) {
+            applicationScope.launch {
+                syncRunScheduler.scheduleSync(
+                    type = SyncRunScheduler.SyncType.DeleteRun(id)
+                )
+            }.join()
+        }
     }
 
     /**
