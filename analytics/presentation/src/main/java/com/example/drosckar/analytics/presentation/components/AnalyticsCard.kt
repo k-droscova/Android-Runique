@@ -1,4 +1,4 @@
-package com.example.drosckar.presentation.components
+package com.example.drosckar.analytics.presentation.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

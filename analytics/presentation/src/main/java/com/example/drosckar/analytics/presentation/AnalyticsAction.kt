@@ -1,4 +1,4 @@
-package com.example.drosckar.presentation
+package com.example.drosckar.analytics.presentation
 
 /**
  * Represents all user actions that can be performed on the Analytics Dashboard screen.

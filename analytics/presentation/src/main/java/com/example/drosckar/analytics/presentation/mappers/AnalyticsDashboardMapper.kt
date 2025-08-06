@@ -1,10 +1,10 @@
-package com.example.drosckar.presentation.mappers
+package com.example.drosckar.analytics.presentation.mappers
 
 import com.example.drosckar.analytics.domain.AnalyticsValues
 import com.example.drosckar.core.presentation.ui.formatted
 import com.example.drosckar.core.presentation.ui.toFormattedKm
 import com.example.drosckar.core.presentation.ui.toFormattedKmh
-import com.example.drosckar.presentation.AnalyticsDashboardState
+import com.example.drosckar.analytics.presentation.AnalyticsDashboardState
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit

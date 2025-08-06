@@ -1,4 +1,4 @@
-package com.example.drosckar.presentation
+package com.example.drosckar.analytics.presentation
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.drosckar.analytics.domain.AnalyticsRepository
-import com.example.drosckar.presentation.mappers.toAnalyticsDashboardState
+import com.example.drosckar.analytics.presentation.mappers.toAnalyticsDashboardState
 import kotlinx.coroutines.launch
 
 /**

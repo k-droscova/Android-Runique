@@ -1,4 +1,4 @@
-package com.example.drosckar.presentation
+package com.example.drosckar.analytics.presentation
 
 /**
  * UI state model for the Analytics Dashboard screen.
