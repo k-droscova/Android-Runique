@@ -1,4 +1,4 @@
-package com.example.drosckar.presentation
+package com.example.drosckar.analytics.presentation
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,11 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.drosckar.analytics.presentation.R
 import com.example.drosckar.core.presentation.designsystem.RuniqueTheme
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueScaffold
 import com.example.drosckar.core.presentation.designsystem.components.RuniqueToolbar
-import com.example.drosckar.presentation.components.AnalyticsCard
+import com.example.drosckar.analytics.presentation.components.AnalyticsCard
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
