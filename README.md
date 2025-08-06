@@ -92,6 +92,17 @@ It’s installed **on demand** the first time the user accesses it. This feature
 
 ---
 
+## 📜 Certificate of Completion
+
+This project was completed as part of the [Essentials of Industry-Level Android App Development](https://pl-coding.com/) course.  
+Below is the certificate of completion awarded upon successfully finishing the course:
+
+![Certificate](certificates/runique-certificate.png)
+
+
+---
+
+
 ## 🧠 Credits
 
 - Course: [Philipp Lackner – Essentials of Industry-Level Android](https://pl-coding.com/)
