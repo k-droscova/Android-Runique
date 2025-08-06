@@ -1,6 +1,7 @@
 package com.example.drosckar.runique
 
 import android.app.Application
+import android.content.Context
 import com.example.drosckar.auth.data.di.authDataModule
 import com.example.drosckar.auth.presentation.di.authViewModelModule
 import com.example.drosckar.core.data.di.coreDataModule
@@ -10,6 +11,7 @@ import com.example.drosckar.run.location.di.locationModule
 import com.example.drosckar.run.network.di.networkModule
 import com.example.drosckar.run.presentation.di.runPresentationModule
 import com.example.drosckar.runique.di.appModule
+import com.google.android.play.core.splitcompat.SplitCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
@@ -55,5 +57,10 @@ class RuniqueApp: Application() {
                 runDataModule,
             )
         }
+    }
+
+    override fun attachBaseContext(base: Context?) {
+        super.attachBaseContext(base)
+        SplitCompat.install(this)
     }
 }
