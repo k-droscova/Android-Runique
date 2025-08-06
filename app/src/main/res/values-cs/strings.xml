@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Runique</string>
+    <string name="title_analytics_feature">Analytics</string>
+    <string name="error_couldnt_load_module">Nepodařilo se načíst modul</string>
+    <string name="error_installation_failed">Instalace se bohužel nezdařila. Vyzkoušejte to prosím později.</string>
+    <string name="analytics_installed">Analytics feature byla úspěšně nainstalována. Nyní ji můžete použít.</string>
+    <string name="installing_module">Modul se instaluje.</string>
+</resources>

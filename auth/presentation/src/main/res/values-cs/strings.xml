@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="runique">Runique</string>
+    <string name="welcome_to_runique">Vítejte v Runique!</string>
+    <string name="runique_description">Sledujte své běhy, stanovujte si cíle a dosahujte fitness milníků s naší intuitivní aplikací.</string>
+    <string name="sign_up">Registrovat se</string>
+    <string name="sign_in">Přihlásit se</string>
+    <string name="create_account">Vytvořit účet</string>
+    <string name="already_have_an_account">Už máte účet?</string>
+    <string name="login">Přihlásit se</string>
+    <string name="example_email">priklad@test.com</string>
+    <string name="email">E-mail</string>
+    <string name="must_be_a_valid_email">Musí být platný e-mail</string>
+    <string name="password">Heslo</string>
+    <string name="at_least_x_characters">Alespoň %d znaků</string>
+    <string name="at_least_one_number">Alespoň jedno číslo</string>
+    <string name="contains_lowercase_char">Obsahuje malé písmeno</string>
+    <string name="contains_uppercase_char">Obsahuje velké písmeno</string>
+    <string name="register">Registrovat se</string>
+    <string name="error_email_exists">Uživatl s tímto e-mailem již existuje..</string>
+    <string name="registration_successful">Registrace byla úspěšná! Nyní se můžete přihlásit.</string>
+    <string name="hi_there">Ahoj!</string>
+    <string name="runique_welcome_text">Vítej, jsem tvůj dokonalý běžecký společník! Sleduj, analyzuj a pokoř své běhy.</string>    <string name="dont_have_an_account">Ještě nemáte účet?</string>
+    <string name="youre_logged_in">Byl jsi úspěšně přihlášen.</string>
+    <string name="error_email_password_incorrect">Nesprávné heslo či email.</string>
+</resources>

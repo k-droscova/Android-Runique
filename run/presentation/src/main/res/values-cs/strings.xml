@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="runique">Runique</string>
+    <string name="analytics">Analytics</string>
+    <string name="logout">Odhlásit se</string>
+    <string name="active_run">Aktivní běh</string>
+    <string name="pause_run">Zastavit běh</string>
+    <string name="start_run">Začít běh</string>
+    <string name="duration">Uplynulý čas</string>
+    <string name="distance">Vzdálenost</string>
+    <string name="pace">Tempo</string>
+    <string name="permission_required">Je vyžadováno oprávnění</string>
+    <string name="location_notification_rationale">Aby bylo možné sledovat vaši polohu a zobrazit aktuální čas v oznámení, aplikace k tomu potřebuje vaše oprávnění. Klikněte prosím na „OK“ pro jeho udělení.</string>
+    <string name="location_rationale">Aby bylo možné sledovat vaši polohu, aplikace k tomu potřebuje vaše oprávnění. Klikněte prosím na „OK“ pro jeho udělení.</string>
+    <string name="notification_rationale">Aby bylo možné zobrazit aktuální čas v oznámení, aplikace k tomu potřebuje vaše oprávnění. Klikněte prosím na „OK“ pro jeho udělení.</string>
+    <string name="okay">OK</string>
+    <string name="running_is_paused">Běh je pozastaven</string>
+    <string name="resume_or_finish_run">Chceš pokračovat či ukončit běh?</string>
+    <string name="resume">Pokračovat</string>
+    <string name="finish">Ukončit</string>
+    <string name="run_map">Mapa</string>
+    <string name="error_couldnt_load_image">Nepodařilo se načíst obrázek.</string>
+    <string name="total_running_time">Celkový čas</string>
+    <string name="avg_speed">Ø Rychlost</string>
+    <string name="max_speed">Max Rychlost</string>
+    <string name="total_elevation">Celkové převýšení</string>
+    <string name="delete">Smazat</string>
+</resources>
